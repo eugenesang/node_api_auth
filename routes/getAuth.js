@@ -1,18 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
+const { createAndEncryptKey } = require('../security/encryption-keys');
 
-// Set environment variables for encryption key and secret key
-const encryptionKey = "rQCSUZSr7v85Jc4AHAFIMoiT1GSfmlWn";
-const secretKey = "Yog2qVMvtrLEWVSTRp5ANAYvVw7b3Bh4";
+const secretKey = process.env.SECRET_KEY;
 
 // Function to generate auth keys
 const generateAuthKeys = async (req, res) => {
     try {
-        const authKey = crypto.randomBytes(32).toString('hex');
-        const encryptedAuthKey = crypto.createHmac('sha256', encryptionKey).update(authKey).digest('hex');
-        const payload = { authKey: encryptedAuthKey };
+        const authKey = createAndEncryptKey();
+        const payload = { authKey };
         const token = jwt.sign(payload, secretKey, { expiresIn: '1h' });
         res.json({ token });
     } catch (error) {
